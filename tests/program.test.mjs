@@ -1,0 +1,22 @@
+import {readFileSync} from 'node:fs';
+import ts from 'typescript';
+import assert from 'node:assert/strict';
+const source=readFileSync(new URL('../lib/program.ts',import.meta.url),'utf8');
+const js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
+const {plan,workouts,suggestion,readiness,monday,addDays}=await import('data:text/javascript;base64,'+Buffer.from(js).toString('base64'));
+let checks=0;
+for(let id=0;id<5;id++)for(const budget of [45,50,55,60])for(const light of [false,true])for(const deload of [false,true]){const p=plan(id,budget,light,deload);assert(p.minutes<=budget);assert(p.ex.every(e=>e.sets>=1));checks++}
+const e=workouts[0].ex[0];
+const session={date:'2026-10-06',workout:0,minutes:50,sets:Array.from({length:e.sets},()=>({ex:e.id,kg:80,reps:e.hi,rir:2}))};
+assert.equal(suggestion(e,[session]).kg,'82');
+assert.equal(suggestion(e,[{...session,sets:session.sets.slice(1)}]).kg,'80');
+assert.equal(suggestion(e,[{...session,deload:true}]).kg,'80');
+assert.equal(suggestion(e,[session],true).kg,'80');
+assert.equal(suggestion(e,[{...session,sets:session.sets.map(s=>({...s,rir:0}))}]).kg,'80');
+assert.equal(suggestion(e,[]).kg,'');
+assert.equal(monday('2026-10-11'),'2026-10-05');
+assert.equal(addDays('2026-12-31',1),'2027-01-01');
+assert.equal(readiness(),null);
+assert(readiness({sleep:3,energy:1,soreness:5,pain:false})<55);
+assert(readiness({sleep:8,energy:5,soreness:0,pain:false})<=100);
+console.log(`Passed ${checks} time-budget scenarios and progression, recovery, date checks.`);
