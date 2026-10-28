@@ -1,0 +1,18 @@
+import {readFileSync} from 'node:fs';
+import ts from 'typescript';
+import assert from 'node:assert/strict';
+import {z} from 'zod';
+globalThis.__cavernaZod=z;
+const compile=source=>'data:text/javascript;base64,'+Buffer.from(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText).toString('base64');
+const caveURL=compile(readFileSync(new URL('../lib/caverna.ts',import.meta.url),'utf8').replace("import { z } from 'zod';",'const z=globalThis.__cavernaZod;'));
+const {cavernaSchema,progress}=await import(caveURL);
+const {stateSchema}=await import(compile(readFileSync(new URL('../lib/state-schema.ts',import.meta.url),'utf8').replace("import { z } from 'zod';",'const z=globalThis.__cavernaZod;').replace("'./caverna'",JSON.stringify(caveURL))));
+const old={start:'2026-10-28',schedules:{},history:[],metrics:[],recovery:[],deloads:{}};
+assert(stateSchema.safeParse(old).success,'existing accounts and backups must remain valid');
+const c={start:'2026-10-28',duration:14,target:'Redes sociais',trigger:'Celular na cama',barrier:'Carregar fora do quarto',replacement:'Ler duas páginas',reviews:[],urges:[]};
+assert.deepEqual(stateSchema.parse({...old,caverna:c}).caverna,c,'API must retain the new data');
+assert.equal(progress(c,'2026-10-27').day,0);
+assert.equal(progress(c,'2026-10-28').day,1);
+assert.equal(progress(c,'2026-11-11').complete,true);
+for(const invalid of [{duration:0},{target:''},{urges:[{at:'invalid'}]},{reviews:[{date:'2026-10-28',focus:481,environment:true,connection:false,note:''}]}])assert.equal(cavernaSchema.safeParse({...c,...invalid}).success,false);
+console.log('Caverna: legacy compatibility, API round-trip, dates and validation passed.');
