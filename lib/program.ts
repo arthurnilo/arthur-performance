@@ -1,3 +1,4 @@
+import type {Caverna} from './caverna';
 export type Exercise={id:string;name:string;group:string;sets:number;lo:number;hi:number;rest:number;note?:string;power?:boolean};
 const e=(id:string,name:string,group:string,sets:number,lo:number,hi:number,rest=90,note=''):Exercise=>({id,name,group,sets,lo,hi,rest,note});
 export const workouts=[
@@ -15,7 +16,7 @@ export type SetLog={ex:string;group:string;kg:number;reps:number;rir:number;powe
 export type Session={date:string;workout:number;sets:SetLog[];minutes:number;kind?:string;deload?:boolean};
 export type Metric={date:string;weight:number;waist?:number;arm?:number;thigh?:number};
 export type Recovery={date:string;sleep:number;energy:number;soreness:number;pain:boolean};
-export type State={start:string;schedules:Record<string,number[]>;history:Session[];metrics:Metric[];recovery:Recovery[];deloads:Record<string,boolean>;draft?:{selected:number;budget:number;light:boolean;startTime:number;logs:Record<string,SetLog>;inputs:Record<string,{kg:string;reps:string;rir:string}>}};
+export type State={caverna?:Caverna;start:string;schedules:Record<string,number[]>;history:Session[];metrics:Metric[];recovery:Recovery[];deloads:Record<string,boolean>;draft?:{selected:number;budget:number;light:boolean;startTime:number;logs:Record<string,SetLog>;inputs:Record<string,{kg:string;reps:string;rir:string}>}};
 export const initial=():State=>({start:monday(today()),schedules:{},history:[],metrics:[{date:today(),weight:78}],recovery:[],deloads:{}});
 export const readiness=(r?:Recovery)=>r?Math.round(Math.max(0,Math.min(100, r.sleep/8*35+r.energy*10+(5-r.soreness)*3-(r.pain?40:0)))):null;
 export function plan(id:number,budget:number,light:boolean,deload:boolean){

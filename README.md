@@ -162,3 +162,31 @@ Checklist de integração:
 - Variáveis Vercel: https://vercel.com/docs/environment-variables
 
 O programa de treino é um ponto de partida ajustável. A meta de 85–86 kg é de médio/longo prazo; gráficos de peso, medidas e volume não medem massa muscular diretamente.
+
+
+## Projeto Caveira — modo caverna
+
+Nova aba integrada ao dashboard, mantendo calendário, ciclo de 16 semanas, treinos,
+progressão, recuperação e histórico existentes. O foco físico continua sendo
+hipertrofia, força e capacidade atlética; o modo caverna acrescenta organização da atenção.
+
+- Compromisso de 7–90 dias com um hábito escolhido pelo usuário, gatilho,
+  barreira ambiental e ação alternativa. O padrão inicial é 14 dias.
+- Registro de impulsos com intensidade, contexto, resultado e próxima ação.
+  Deslizes permanecem no histórico e não apagam progresso anterior.
+- Revisão diária editável com minutos de foco, aplicação da barreira,
+  contato com pessoas de confiança e ajuste para o dia seguinte.
+- Exclusão dos relatos e revisões com confirmação, preservando o plano.
+- Dados sincronizados em `athlete_state.data.caverna`, com validação Zod e
+  o mesmo controle de revisão e isolamento por conta existentes. Nenhuma
+  migração SQL é necessária. Backups antigos continuam válidos.
+- Exportar JSON inclui os relatos. Importar um backup antigo substitui o
+  estado completo, como antes, portanto também remove os dados do modo caverna.
+
+O app não bloqueia sites ou aplicativos e não oferece tratamento para dependência.
+O protocolo de pausa é um roteiro voluntário, sem promessa de eliminar impulsos.
+Não há punição, diagnóstico, ranking ou inferência de abstinência por falta de registros.
+
+Validação: `npm ci`, `npm run typecheck`, `npm test`, `npm run build`.
+Os testes do modo caverna verificam compatibilidade com estados antigos,
+preservação dos campos pela validação da API, limites e contagem de dias.
