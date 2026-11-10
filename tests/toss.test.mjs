@@ -1,0 +1,44 @@
+import {readFileSync} from 'node:fs';
+import assert from 'node:assert/strict';
+import ts from 'typescript';
+import {z} from 'zod';
+const compile=s=>'data:text/javascript;base64,'+Buffer.from(ts.transpileModule(s,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText).toString('base64');
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+const {tossPlan,conditioningOptions,phase,tossWeek,loadFromRM,warmups,setsFor,conditioning}=await import(compile(read('lib/toss.ts')));
+for(let week=1;week<=16;week++)for(let day=1;day<=3;day++){
+ const exercises=tossPlan(week,day);
+ assert.equal(exercises.length,9,`week ${week} day ${day}`);
+ for(const ex of exercises){assert(ex.sets>0);assert(ex.rest);assert(ex.target);assert(ex.category>=1&&ex.category<=11);if(ex.options)assert(ex.options.length>0)}
+}
+assert.equal(tossPlan(4,1)[1].target,'6 reps');assert.equal(tossPlan(5,1)[1].target,'4 reps');
+assert.equal(tossPlan(8,1)[1].note,'30%, 40%, 50% do 1RM nas três séries.');
+assert.equal(tossPlan(9,1)[1].sets,4);assert.equal(tossPlan(13,1)[1].target,'3 reps');
+assert.equal(tossPlan(16,1)[0].name,'Hop, Hop & Stick');
+assert.equal(tossPlan(8,3)[1].target,'reps não informadas no PDF');
+assert(!tossPlan(1,1)[2].options.includes('Deadlift (barbell)'));
+assert(tossPlan(1,2)[1].options.every(x=>x.includes('Snatch')));
+assert(tossPlan(5,2)[1].options.every(x=>x.includes('Clean')));
+assert(tossPlan(13,3)[0].options.every(x=>!(/Thruster|Jerk/.test(x))));
+assert.equal(conditioning[conditioningOptions(1)[0]].title,'The 1-Minute Consistency');
+assert.equal(conditioning[conditioningOptions(5)[0]].title,"Simon's Arm Farm");
+assert.equal(conditioning[conditioningOptions(9)[0]].title,'OLY');
+assert.equal(setsFor(tossPlan(13,1)[8],'segundos'),2);
+assert.equal(setsFor(tossPlan(13,1)[8],'reps'),3);
+assert.deepEqual(conditioningOptions(13),[0,1,2,3]);assert.deepEqual(conditioningOptions(14),[4,5,6,7]);assert.deepEqual(conditioningOptions(15),[8,9,10,11]);assert.equal(conditioningOptions(16).length,12);
+assert.equal(tossWeek('2026-11-10','2026-11-16'),1);assert.equal(tossWeek('2026-11-10','2026-11-17'),2);
+assert.equal(phase(8),'Deload · semana 8');assert.equal(phase(16),'Deload · semana 16');
+assert.equal(loadFromRM(100,85),85);assert(Object.values(warmups).every(x=>x.length===11));assert.throws(()=>tossPlan(17,1));
+globalThis.__tossZod=z;
+const tossURL=compile(read('lib/toss-schema.ts').replace("import {z} from 'zod';",'const z=globalThis.__tossZod;'));
+const caveURL=compile(read('lib/caverna.ts').replace("import { z } from 'zod';",'const z=globalThis.__tossZod;'));
+const {stateSchema}=await import(compile(read('lib/state-schema.ts').replace("import { z } from 'zod';",'const z=globalThis.__tossZod;').replace("'./caverna'",JSON.stringify(caveURL)).replace("'./toss-schema'",JSON.stringify(tossURL))));
+const {tossSchema}=await import(tossURL);
+const old={start:'2026-10-28',schedules:{},history:[],metrics:[],recovery:[],deloads:{}};
+assert(stateSchema.safeParse(old).success);
+const session={id:'test',date:'2026-11-10',week:1,day:1,started:1794326400000,sets:[{key:'0-0',exercise:'Depth Jump Freeze',kg:0,value:5,unit:'reps',rir:5,quality:true}],minutes:45,notes:'Técnica',warmup:'Beastmode',warmupDone:true};
+const toss={start:'2026-11-10',choices:{},schedule:{'1-1':'2026-11-10'},sessions:[session],draft:session,technique:[{date:'2026-11-10',attempts:5,good:3,focus:'Dip vertical',note:'Mesmo parceiro'}]};
+assert.deepEqual(stateSchema.parse({...old,toss}).toss,toss,'API retains sessions, draft, schedule and technical records');
+assert(!tossSchema.safeParse({...toss,technique:[{...toss.technique[0],good:6}]}).success);
+assert(!tossSchema.safeParse({...toss,draft:{...session,week:17}}).success);
+assert(!tossSchema.safeParse({...toss,draft:{...session,sets:[{...session.sets[0],kg:-1}]}}).success);
+console.log('TOSS: 48 sessions, phase boundaries, categories, deloads, warmups, scheduling, legacy compatibility and API round-trip passed.');

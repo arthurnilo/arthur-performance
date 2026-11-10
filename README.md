@@ -190,3 +190,33 @@ Não há punição, diagnóstico, ranking ou inferência de abstinência por fal
 Validação: `npm ci`, `npm run typecheck`, `npm test`, `npm run build`.
 Os testes do modo caverna verificam compatibilidade com estados antigos,
 preservação dos campos pela validação da API, limites e contagem de dias.
+## TOSS Progress 2.0
+
+A aba inicial agora é TOSS Progress, baseada no manual fornecido de Constantin
+Stalzer e Simon Gavanda. O PDF e os vídeos privados não são publicados no repositório.
+
+- 16 semanas: fases 1–4, 5–7, 9–12 e 13–15; deloads em 8 e 16.
+- Três dias de força, em ordem, com séries, faixas, descansos, tempos e escolhas
+  de categoria; um quarto dia opcional de condicionamento por semana.
+- Cinco rotinas de aquecimento, séries preparatórias e calculadora de carga pela
+  tabela percentual do manual. Não aplica a progressão automática do treino antigo.
+- Datas ajustáveis por semana/dia, sem acumular sessões perdidas. Salvar séries
+  permite retomar após recarregar. Não permite iniciar treino antigo enquanto há
+  sessão TOSS aberta (nem iniciar TOSS com treino antigo aberto).
+- Carga, reps/segundos/metros, RIR, qualidade e lados podem ser registrados.
+  Condicionamento é registrado por tempo e notas de resultado/adaptações.
+- Registro técnico do tiro é adicional ao PDF, explicitamente identificado:
+  tentativas, execuções boas, foco e critério do treinador.
+- `athlete_state.data.toss` armazena o ciclo, escolhas, datas, rascunho,
+  sessões e registros técnicos. Schema opcional mantém backups antigos válidos;
+  exportação/importação JSON inclui TOSS. Não requer migração SQL.
+- O treino antigo e seus registros continuam acessíveis como anteriores.
+
+Limitações da fonte: semana 8/dia 3/agachamento está impresso como “2x”, sem
+repetições. O app sinaliza isso e não inventa uma meta. O aquecimento é descrito como 5:55 no texto, embora 11 intervalos 20/10 somem
+5:30; ambos ficam explicitados. Nomes originais servem de referência aos vídeos.
+A preparação técnica de saltos e levantamentos deve ser revisada com o treinador.
+
+Validação adicional: `tests/toss.test.mjs` cobre as 48 sessões de força,
+limites de fases, categorias permitidas, deloads, calendário e preservação dos
+campos pela validação usada na API.
