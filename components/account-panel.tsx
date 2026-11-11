@@ -1,0 +1,6 @@
+'use client';
+import type {User} from '@supabase/supabase-js';
+type Profile={name:string;goal:string};
+export default function AccountPanel({user,profile,disabled,onSave}:{user:User;profile?:Profile;disabled:boolean;onSave:(profile:Profile)=>Promise<boolean>}){
+ return <section className="panel account-panel"><span className="eyebrow">MINHA CONTA</span><h2>Seu espaço de treino</h2><p><b>{user.email}</b></p><p>Seu amigo deve usar “Criar minha conta”, com o e-mail dele. Cada conta começa com seus próprios registros e calendário.</p><form onSubmit={async e=>{e.preventDefault();const f=new FormData(e.currentTarget);await onSave({name:String(f.get('name')).trim(),goal:String(f.get('goal')).trim()})}}><label>Como quer ser chamado?<input name="name" required minLength={2} maxLength={60} defaultValue={profile?.name||user.user_metadata?.full_name||''}/></label><label>Seu objetivo<input name="goal" maxLength={120} defaultValue={profile?.goal||''} placeholder="Ex.: melhorar meu tiro no partner"/></label><button className="btn dark" disabled={disabled}>Salvar meu perfil</button></form><p className="tiny">Calendário, cargas, medidas, treinos em andamento e importações pertencem somente à conta conectada.</p></section>
+}

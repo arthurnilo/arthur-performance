@@ -9,6 +9,7 @@ async function authenticate(req:Request){
  const db=createClient(url,key,{global:{headers:{Authorization:`Bearer ${token}`}},auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
  const {data:{user},error}=await db.auth.getUser(token);
  if(error||!user)return {error:Response.json({error:'Sessão expirada. Entre novamente.'},{status:401})};
+ if(req.headers.get('x-account-id')&&req.headers.get('x-account-id')!==user.id)return {error:Response.json({error:'A conta mudou. Recarregue antes de continuar.'},{status:409})};
  return {db,user};
 }
 export async function GET(req:Request){
