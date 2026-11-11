@@ -5,6 +5,7 @@ const date=z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(v=>!Number.isNaN(Date.
 const num=(min:number,max:number)=>z.number().finite().min(min).max(max);
 const set=z.object({ex:z.string().max(60),group:z.string().max(40),kg:num(0,500),reps:num(1,100).int(),rir:num(0,10),power:z.boolean().optional()});
 export const stateSchema=z.object({
+ profile:z.object({name:z.string().trim().min(2).max(60),goal:z.string().trim().max(120)}).optional(),
  toss:tossSchema.optional(),
  caverna:cavernaSchema.optional(),
  start:date,

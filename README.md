@@ -220,3 +220,44 @@ A preparação técnica de saltos e levantamentos deve ser revisada com o treina
 Validação adicional: `tests/toss.test.mjs` cobre as 48 sessões de força,
 limites de fases, categorias permitidas, deloads, calendário e preservação dos
 campos pela validação usada na API.
+
+## Contas individuais e treino do dia
+
+A interface volta à identidade Arthur Performance. A aba e a chamada do modo
+caverna ficam ocultas; os dados antigos continuam compatíveis nos backups.
+
+Cada pessoa cria sua conta pelo próprio e-mail e senha, com seu nome. A aba
+**Minha conta** edita somente o perfil da conta conectada. Não há convite por
+e-mail nem conta de amigo criada automaticamente. Cadastro e confirmação de
+email dependem da configuração Auth já instalada no Supabase.
+
+O isolamento existente por `auth.uid()`/RLS continua sendo a fronteira de acesso.
+O cliente também vincula cada requisição ao ID da conta que abriu o dashboard.
+Se a sessão mudar durante uma operação, o cliente bloqueia o envio e a API rejeita
+IDs divergentes. Trocar de conta desmonta os componentes e reinicializa os estados;
+uma resposta pendente da conta anterior não é aplicada no dashboard novo.
+Perfis, pesos fictícios e nomes de Arthur não são copiados para contas novas.
+
+O plano TOSS passa a abrir pronto, sem etapa obrigatória de seleção:
+
+- 48 sessões de força agendadas em segunda, quarta e sexta. Dia 1 começa no
+  primeiro desses dias a partir do início do ciclo; os dias 2 e 3 seguem a ordem.
+- Exercícios e unidades escolhidos para todas as fases, respeitando as categorias
+  e as exclusões de cada quadro. Ajustes ficam opcionais.
+- O cartão **Treino de hoje** inicia a sessão da data; na folga mostra a próxima.
+  Não acumula treinos perdidos e não permite duplicar uma sessão concluída.
+- O condicionamento continua opcional, sem marcar automaticamente um quarto dia.
+- Cargas iniciais não são inventadas. O app reaproveita a última carga registrada
+  no mesmo exercício da própria conta; o usuário registra a carga inicial.
+- Ciclos existentes ganham os padrões sem apagar escolhas, datas ou histórico.
+  Sessões em andamento não são reescritas. Backups antigos permanecem válidos.
+- A importação confirmada substitui registros da própria conta, preservando o
+  perfil conectado. Ela fica bloqueada enquanto houver treino em andamento.
+
+Não exige migração SQL adicional. A instalação original de `supabase/schema.sql`
+(RLS e função de salvamento com revisão) continua obrigatória.
+
+Testes novos verificam 432 escolhas, as 48 datas, identificação da sessão de hoje,
+folgas, atrasos sem acúmulo, isolamento dos padrões entre contas e preservação de
+rascunhos. Testes de autenticação verificam rejeição de requisições após troca de
+conta e testes PostgreSQL verificam que editar a conta B não altera a conta A.

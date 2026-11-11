@@ -11,7 +11,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test": "node tests/program.test.mjs && node tests/database.test.mjs && node tests/caverna.test.mjs && node tests/toss.test.mjs"
+    "test": "node tests/program.test.mjs && node tests/database.test.mjs && node tests/caverna.test.mjs && node tests/toss.test.mjs && node tests/ready-plan.test.mjs && node tests/account-boundary.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0",

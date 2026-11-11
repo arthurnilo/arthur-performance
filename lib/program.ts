@@ -17,8 +17,8 @@ export type SetLog={ex:string;group:string;kg:number;reps:number;rir:number;powe
 export type Session={date:string;workout:number;sets:SetLog[];minutes:number;kind?:string;deload?:boolean};
 export type Metric={date:string;weight:number;waist?:number;arm?:number;thigh?:number};
 export type Recovery={date:string;sleep:number;energy:number;soreness:number;pain:boolean};
-export type State={toss?:TossState;caverna?:Caverna;start:string;schedules:Record<string,number[]>;history:Session[];metrics:Metric[];recovery:Recovery[];deloads:Record<string,boolean>;draft?:{selected:number;budget:number;light:boolean;startTime:number;logs:Record<string,SetLog>;inputs:Record<string,{kg:string;reps:string;rir:string}>}};
-export const initial=():State=>({start:monday(today()),schedules:{},history:[],metrics:[{date:today(),weight:78}],recovery:[],deloads:{}});
+export type State={profile?:{name:string;goal:string};toss?:TossState;caverna?:Caverna;start:string;schedules:Record<string,number[]>;history:Session[];metrics:Metric[];recovery:Recovery[];deloads:Record<string,boolean>;draft?:{selected:number;budget:number;light:boolean;startTime:number;logs:Record<string,SetLog>;inputs:Record<string,{kg:string;reps:string;rir:string}>}};
+export const initial=():State=>({start:monday(today()),schedules:{},history:[],metrics:[],recovery:[],deloads:{}});
 export const readiness=(r?:Recovery)=>r?Math.round(Math.max(0,Math.min(100, r.sleep/8*35+r.energy*10+(5-r.soreness)*3-(r.pain?40:0)))):null;
 export function plan(id:number,budget:number,light:boolean,deload:boolean){
  let ex=workouts[id].ex.map(x=>({...x,sets:deload?Math.max(1,Math.ceil(x.sets/2)):light?Math.max(1,x.sets-1):x.sets}));
